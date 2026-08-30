@@ -1,0 +1,46 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 16px;
+  background: #ffffff;
+}
+
+#app {
+  text-align: center;
+}
+
+h2 {
+  margin-top: 0;
+  color: #333333;
+}
+
+#recordInfo {
+  color: #555555;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+#callButton {
+  background-color: #2e7d32;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 32px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#callButton:disabled {
+  background-color: #a5a5a5;
+  cursor: not-allowed;
+}
+
+#callButton:hover:not(:disabled) {
+  background-color: #256428;
+}
+
+#statusMessage {
+  margin-top: 16px;
+  font-size: 14px;
+  min-height: 18px;
+}

@@ -16,10 +16,10 @@ var CLICKTOCALL_CONFIG = {
 
   // These are the "labels" we attach to each piece of data before sending
   // it to your Catalyst function. They must exactly match the names your
-  // Catalyst function reads from req.body (see catalyst-function.js, the
-  // app.post('/clicktocall', ...) route) — currently recordId / module /
-  // phoneNumber on both sides. Only rename a value here if you also rename
-  // it in that function's code.
+  // Catalyst function reads from the request body (see catalyst-function.js,
+  // the "/clicktocall" route) — currently recordId / module / phoneNumber
+  // on both sides. Only rename a value here if you also rename it in that
+  // function's code.
   FIELD_NAMES: {
     recordId: "recordId",
     module: "module",

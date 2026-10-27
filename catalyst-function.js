@@ -1,52 +1,79 @@
-// ============================================================
-// REFERENCE COPY — this file is not run from this repo.
-// It's a saved copy of the code that lives inside your Zoho
-// Catalyst function's own online editor. Paste its contents
-// there (see SETUP-AND-TESTING.md Step 0 for exact steps).
-// ============================================================
+"use strict";
 
-const catalyst = require('zcatalyst-sdk-node');
-const express = require('express');
-const app = express();
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(data));
+}
 
-// Lets Express read JSON data sent in the body of a POST request.
-// (Needed for the new /clicktocall route below — your existing
-// /about and /contact routes don't need it.)
-app.use(express.json());
+module.exports = (req, res) => {
+  // Allows the Zoho CRM widget (a different website) to call this function
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-app.get('/about', (req, res) => {
-  res.status(200).send('This is a sample response from the "about" route.');
-});
+  const url = req.url.split("?")[0];
 
-app.get('/contact', (req, res) => {
-  res.status(200).send('This is a sample response from the "contact" route.');
-});
-
-// ---- NEW: this is the route the Click-to-Call widget sends data to ----
-app.post('/clicktocall', (req, res) => {
-  const { recordId, module, phoneNumber } = req.body || {};
-
-  if (!recordId || !module || !phoneNumber) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing one of: recordId, module, phoneNumber'
-    });
+  // Browsers send a quick "OPTIONS" check before a POST; answer it
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
   }
 
-  console.log('Click-to-Call request received:');
-  console.log('  recordId:    ', recordId);
-  console.log('  module:      ', module);
-  console.log('  phoneNumber: ', phoneNumber);
+  // The new click-to-call route
+  if (url === "/clicktocall" && req.method === "POST") {
+    let raw = "";
 
-  // TODO (later phase): trigger the actual outbound call here.
+    req.on("data", (chunk) => {
+      raw += chunk;
+    });
 
-  res.status(200).json({
-    status: 'success',
-    message: 'Received call request for ' + phoneNumber,
-    recordId: recordId,
-    module: module,
-    phoneNumber: phoneNumber
-  });
-});
+    req.on("end", () => {
+      let body;
+      try {
+        body = JSON.parse(raw || "{}");
+      } catch (err) {
+        sendJson(res, 400, { status: "error", message: "Body must be valid JSON" });
+        return;
+      }
 
-module.exports = app;
+      const recordId = body.recordId;
+      const moduleName = body.module;
+      const phoneNumber = body.phoneNumber;
+
+      if (!recordId || !moduleName || !phoneNumber) {
+        sendJson(res, 400, {
+          status: "error",
+          message: "recordId, module and phoneNumber are all required"
+        });
+        return;
+      }
+
+      console.log("Click-to-call request:", recordId, moduleName, phoneNumber);
+
+      // TODO (later phase): create a session and push to the Android app
+      sendJson(res, 200, {
+        status: "success",
+        message: "Request received",
+        received: { recordId: recordId, module: moduleName, phoneNumber: phoneNumber }
+      });
+    });
+
+    return;
+  }
+
+  // Your original starter routes, kept as they were
+  res.writeHead(200, { "Content-Type": "text/html" });
+  switch (url) {
+    case "/about":
+      res.write("<h1>about page</h1>");
+      break;
+    case "/contact":
+      res.write("<h1>contact page</h1>");
+      break;
+    default:
+      res.write("<h1>default page</h1>");
+      break;
+  }
+  res.end();
+};

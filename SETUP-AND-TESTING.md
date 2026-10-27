@@ -20,59 +20,29 @@ files you will upload to Catalyst (except `catalyst-function.js`, which is
 pasted into your Catalyst *function's* editor, a different place in the
 Catalyst console than static hosting).
 
-## Step 0 — Update your Catalyst function so it understands the widget
+## Step 0 — Update your Catalyst function so it understands the widget ✅ DONE
 
-Your Catalyst function is still the default starter template — it only
-knows how to answer `/about` and `/contact`. It doesn't yet know how to
-receive `recordId`, `module`, and `phoneNumber`. `catalyst-function.js`
-adds a new route, `/clicktocall`, that does.
+Your Catalyst function used to be the default starter template — it only
+knew how to answer `/about` and `/contact`. `catalyst-function.js` now
+matches the live version you already deployed: a plain Node.js handler
+(no Express) with a new `/clicktocall` route that reads `recordId`,
+`module`, and `phoneNumber` from the POST body.
 
-1. In the Zoho Catalyst console, open your **Clicktocall** project, go to
-   **Functions**, and open the function that currently answers `/about`
-   and `/contact`.
-2. Open its code editor (it should show a file like `index.js` with the
-   `/about` and `/contact` routes you already tested).
-3. **Select all the existing code and delete it.**
-4. Open `catalyst-function.js` from this repo, copy its entire contents,
-   and paste it into the now-empty editor. (It keeps your `/about` and
-   `/contact` routes exactly as they were, and adds the new
-   `/clicktocall` one below them.)
-5. Save, then deploy/publish the function the same way you did the first
-   time you tested it.
-
-**How to check you did it right — test it exactly like you did before, in
-Postman:**
-- Method: **POST**
-- URL: the same base URL you used for `/about`, but ending in
-  `/clicktocall` instead (e.g. if your old URL ended in `.../about`, the
-  new one ends in `.../clicktocall`)
-- Body tab → raw → JSON, paste in:
-  ```json
-  {
-    "recordId": "test123",
-    "module": "Leads",
-    "phoneNumber": "+15551234567"
-  }
-  ```
-- Click Send.
-
-**What "working" looks like:** a response with status **200** and a JSON
-body like:
+**You've already done this and confirmed it in Postman** — a POST to the
+`/clicktocall` URL returns status **200** with a body like:
 ```json
 {
   "status": "success",
-  "message": "Received call request for +15551234567",
-  "recordId": "test123",
-  "module": "Leads",
-  "phoneNumber": "+15551234567"
+  "message": "Request received",
+  "received": { "recordId": "test123", "module": "Leads", "phoneNumber": "+15551234567" }
 }
 ```
-Also try sending it with one field removed — you should get back status
-**400** and `"status": "error"`. That confirms the function is correctly
-checking for all three fields.
+(Sending it with a field missing should give status **400** and
+`"status": "error"` — worth a quick check if you haven't already, but not
+required to move on.)
 
-Once that works in Postman, note down the exact URL you just used (ending
-in `/clicktocall`) — you'll paste it into `config.js` next.
+Note down the exact URL you tested in Postman (ending in `/clicktocall`)
+— you'll paste it into `config.js` next.
 
 ## Step 1 — Fill in your settings
 

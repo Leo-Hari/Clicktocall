@@ -13,25 +13,73 @@ Number to your Catalyst function.
 | `widget.html` | The page itself. Loads Zoho's script, then your CSS and JS. | No. |
 | `style.css` | Colors, spacing, button look. | Only if you want it to look different. |
 | `widget.js` | The logic: ask Zoho CRM which record we're on, fetch its Phone number, and send everything to your Catalyst function when Call is clicked. | No, unless something needs to change later. |
+| `catalyst-function.js` | A saved copy of the code that goes **inside your Catalyst function** (not in this widget). It's the other end of the connection — it's what receives what the widget sends. | **Yes — you paste it into Catalyst once (Step 0 below).** |
 
 Nothing here needs Node.js, npm, or any build step — these are the exact
-files you will upload to Catalyst.
+files you will upload to Catalyst (except `catalyst-function.js`, which is
+pasted into your Catalyst *function's* editor, a different place in the
+Catalyst console than static hosting).
 
-## Before you go further: check one thing in your Catalyst function
+## Step 0 — Update your Catalyst function so it understands the widget
 
-Open your existing, already-tested Catalyst function's code and look at how
-it reads the incoming data (something like `req.body.recordId` or
-`basicIO.getArgument("recordId")`, etc.). Whatever three names it expects
-for record ID / module / phone number, they must match the right-hand side
-values in `config.js`'s `FIELD_NAMES`. Right now it's set to
-`recordId`, `module`, `phoneNumber`. Change only if your function uses
-different names.
+Your Catalyst function is still the default starter template — it only
+knows how to answer `/about` and `/contact`. It doesn't yet know how to
+receive `recordId`, `module`, and `phoneNumber`. `catalyst-function.js`
+adds a new route, `/clicktocall`, that does.
+
+1. In the Zoho Catalyst console, open your **Clicktocall** project, go to
+   **Functions**, and open the function that currently answers `/about`
+   and `/contact`.
+2. Open its code editor (it should show a file like `index.js` with the
+   `/about` and `/contact` routes you already tested).
+3. **Select all the existing code and delete it.**
+4. Open `catalyst-function.js` from this repo, copy its entire contents,
+   and paste it into the now-empty editor. (It keeps your `/about` and
+   `/contact` routes exactly as they were, and adds the new
+   `/clicktocall` one below them.)
+5. Save, then deploy/publish the function the same way you did the first
+   time you tested it.
+
+**How to check you did it right — test it exactly like you did before, in
+Postman:**
+- Method: **POST**
+- URL: the same base URL you used for `/about`, but ending in
+  `/clicktocall` instead (e.g. if your old URL ended in `.../about`, the
+  new one ends in `.../clicktocall`)
+- Body tab → raw → JSON, paste in:
+  ```json
+  {
+    "recordId": "test123",
+    "module": "Leads",
+    "phoneNumber": "+15551234567"
+  }
+  ```
+- Click Send.
+
+**What "working" looks like:** a response with status **200** and a JSON
+body like:
+```json
+{
+  "status": "success",
+  "message": "Received call request for +15551234567",
+  "recordId": "test123",
+  "module": "Leads",
+  "phoneNumber": "+15551234567"
+}
+```
+Also try sending it with one field removed — you should get back status
+**400** and `"status": "error"`. That confirms the function is correctly
+checking for all three fields.
+
+Once that works in Postman, note down the exact URL you just used (ending
+in `/clicktocall`) — you'll paste it into `config.js` next.
 
 ## Step 1 — Fill in your settings
 
 1. Open `config.js`.
-2. Replace `PASTE_YOUR_CATALYST_FUNCTION_URL_HERE` with the exact URL you
-   used successfully in Postman (keep the quotes around it).
+2. Replace `PASTE_YOUR_CATALYST_FUNCTION_URL_HERE` with the exact
+   `/clicktocall` URL you just tested successfully in Postman in Step 0
+   (keep the quotes around it).
 3. Save the file.
 
 **How to check you did it right:** open `config.js` in any text editor —

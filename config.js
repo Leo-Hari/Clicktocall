@@ -5,16 +5,21 @@
 
 var CLICKTOCALL_CONFIG = {
 
-  // Paste the full URL of your Catalyst function here.
-  // This is the same URL you already tested successfully in Postman.
-  // Example:
-  // "https://clicktocall-60012345.development.catalystserverless.com/server/click_to_call_function/execute"
+  // Paste the full URL of your Catalyst function's /clicktocall route here.
+  // This is the same base URL you already tested in Postman for /about or
+  // /contact, but with the end replaced by "/clicktocall". Example:
+  // if your tested URL was:
+  //   https://clicktocall-60012345.development.catalystserverless.com/server/clicktocall_function/about
+  // then this should be:
+  //   https://clicktocall-60012345.development.catalystserverless.com/server/clicktocall_function/clicktocall
   CATALYST_FUNCTION_URL: "PASTE_YOUR_CATALYST_FUNCTION_URL_HERE",
 
-  // These are the "labels" we attach to each piece of data before
-  // sending it to your Catalyst function. Only change the text on
-  // the right-hand side, and only if your function expects different
-  // names (e.g. it reads req.body.record_id instead of req.body.recordId).
+  // These are the "labels" we attach to each piece of data before sending
+  // it to your Catalyst function. They must exactly match the names your
+  // Catalyst function reads from req.body (see catalyst-function.js, the
+  // app.post('/clicktocall', ...) route) — currently recordId / module /
+  // phoneNumber on both sides. Only rename a value here if you also rename
+  // it in that function's code.
   FIELD_NAMES: {
     recordId: "recordId",
     module: "module",
